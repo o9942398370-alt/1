@@ -1,0 +1,55 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'dev.servers.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'dev.servers.app'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '0.0.0'
+    }
+
+    signingConfigs {
+        privateRelease {
+            def ksPath = System.getenv('ANDROID_KEYSTORE_FILE')
+            if (ksPath) {
+                storeFile file(ksPath)
+                storeType 'PKCS12'
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            // Keep the requested versionName unchanged in every build variant.
+        }
+        release {
+            minifyEnabled false
+            // Signing is enabled only when CI/local signing environment variables exist.
+            def signingReady = System.getenv('ANDROID_KEYSTORE_FILE') &&
+                    System.getenv('ANDROID_KEYSTORE_PASSWORD') &&
+                    System.getenv('ANDROID_KEY_ALIAS') &&
+                    System.getenv('ANDROID_KEY_PASSWORD')
+            if (signingReady) signingConfig signingConfigs.privateRelease
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.documentfile:documentfile:1.0.1'
+    testImplementation 'junit:junit:4.13.2'
+}
